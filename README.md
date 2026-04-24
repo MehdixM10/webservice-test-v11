@@ -81,3 +81,20 @@
   </TAB>
 </PARAM>
 ```
+
+# Operations
+
+| Name             | Intitulé                                                            | Action SOAP      | Style |
+| ---------------- | ------------------------------------------------------------------- | ---------------- | ----- |
+| run              | Run X3 sub program                                                  | run              | rpc   |
+| save             | Create X3 object                                                    | save             | rpc   |
+| delete           | Delete X3 object                                                    | delete           | rpc   |
+| read             | Read X3 object                                                      | read             | rpc   |
+| query            | Get X3 objects list                                                 | query            | rpc   |
+| getDescription   | Get X3 web service description regarding publication done in GESAWE | getDescription   | rpc   |
+| modify           | Update X3 object                                                    | modify           | rpc   |
+| actionObject     | Execute specific action on X3 object providing XML flow             | actionObject     | rpc   |
+| actionObjectKeys | Execute specific action on X3 object providing keys                 | actionObjectKeys | rpc   |
+| getDataXmlSchema | Get X3 web service schema regarding publication done in GESAWE      | getDataXmlSchema | rpc   |
+| insertLines      | NOT YET IMPLEMENTED !!!                                             | insertLines      | rpc   |
+| deleteLines      | Remove lines from X3 object table                                   | deleteLines      | rpc   |
