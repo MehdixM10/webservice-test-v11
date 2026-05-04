@@ -9,9 +9,9 @@ import { writeFile } from "fs/promises";
  * @param typeRequest The result response type, inside the xml tag <resultXml>
  * @param operation The operation to call in X3, see the list of operations
  * @param soapAction IDK, probalbly the soap Acion in the list of operations
- * @param trace activate or deactivate the functions trace call, in X3 web service
+ * @param trace activate or deactivate the functions trace call, in X3 web service, if errors uncoutred the resposnse dumped in a log file
  */
-async function callWS(
+export async function callWS(
   webService: string,
   params: string | Object,
   returnParams: string[],
@@ -70,14 +70,16 @@ async function callWS(
   const status = parsedXml.getElementsByTagName("status").item(0);
 
   if (Number(status?.textContent) != 1) {
-    await writeFile(errorFileName, soapXml, "utf-8");
     const messages = parsedXml.getElementsByTagName("message");
-    let errOutput = "Erreur messages:\n";
+    let errOutput = trace === "on" ? "Erreur messages:\n" : "";
     for (let i = 0; i < messages.length; ++i)
       errOutput += messages.item(i)?.textContent + "\n";
-    throw new Error(
-      errOutput + "\n=> you can read the full response xml in " + errorFileName,
-    );
+    if (trace === "on") {
+      await writeFile(errorFileName, soapXml, "utf-8");
+      errOutput +=
+        "\n=> you can read the full response xml in " + errorFileName;
+    }
+    throw new Error(errOutput);
   }
 
   if (resultXml && !resultXml?.getAttribute("xsi:nil")) {
@@ -136,69 +138,3 @@ function extractJsonResponse(
     }
   }
 }
-
-// JSON
-// callWS(
-//   "ZTESTWS",
-//   {
-//     GRP1: {
-//       XOPPNUM_: "",
-//       XFCY_: "FR012",
-//       XIPTDAT_: "20260421",
-//       XVCRDES_: "Test form ts - 1",
-//       XWRHE_: "",
-//       XNB_: 1,
-//     },
-//     GRP2: [
-//       {
-//         XSTOCOU_: 130,
-//         XSEQ_: 0,
-//         XQTYPCU_: 1,
-//         XPCU_: "UN",
-//         XPCUSTUCOE_: 1,
-//         XQTYSTU_: 1,
-//         XLOC_: "A1C14",
-//         XSTA_: "",
-//       },
-//     ],
-//   },
-//  ["XERR_", "XSTA_", "XLOC_", "XCHGNUM_"],
-//   "JSON",
-// )
-//   .then(console.log)
-//   .catch(console.error);
-// XML
-const xml = `<?XML VERSION="1.0" ENCODING="UTF-8"?>
-<PARAM>
-  <GRP ID="GRP1">
-    <FLD NAM="XOPPNUM_"></FLD>
-    <FLD NAM="XFCY_" >FR012</FLD>
-    <FLD NAM="XIPTDAT_" >20260522</FLD>
-    <FLD NAM="XVCRDES_" >Test from ts - xml</FLD>
-    <FLD NAM="XWRHE_" ></FLD>
-    <FLD NAM="XNB_" >1</FLD>
-  </GRP>
-  <TAB DIM="100" ID="GRP2" SIZE="1">
-    <LIN NUM="1" >
-      <FLD NAM="XSTOCOU_">130</FLD>
-      <FLD NAM="XSEQ_" >0</FLD>
-      <FLD NAM="XQTYPCU_" >1</FLD>
-      <FLD NAM="XPCU_">UN</FLD>
-      <FLD NAM="XPCUSTUCOE_" >1</FLD>
-      <FLD NAM="XQTYSTU_" >1</FLD>
-      <FLD NAM="XLOC_">A1C14</FLD>
-      <FLD NAM="XSTA_">A</FLD>
-    </LIN>
-  </TAB>
-</PARAM>
-`;
-callWS(
-  "ZCHANGEWS",
-  xml,
-  ["XERR_", "XSTA_", "XLOC_", "XCHGNUM_"],
-  "XML",
-  "run",
-  "off",
-)
-  .then(console.log)
-  .catch((err) => console.error(err.message));
