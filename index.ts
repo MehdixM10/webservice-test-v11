@@ -62,6 +62,7 @@ async function callWS(
   });
 
   const soapXml = await response.text();
+  const errorFileName = "./error-result-xml.xml";
   // Parsing
   const parsedXml = new DOMParser().parseFromString(soapXml, "text/xml");
   // Extract result & status
@@ -69,14 +70,13 @@ async function callWS(
   const status = parsedXml.getElementsByTagName("status").item(0);
 
   if (Number(status?.textContent) != 1) {
-    // TODO :  Extract the messages if error
-    const errorFileName = "./error-result-xml.xml";
     await writeFile(errorFileName, soapXml, "utf-8");
+    const messages = parsedXml.getElementsByTagName("message");
+    let errOutput = "Erreur messages:\n";
+    for (let i = 0; i < messages.length; ++i)
+      errOutput += messages.item(i)?.textContent + "\n";
     throw new Error(
-      "Somthing wrong happened, status = " +
-        status?.textContent +
-        ", you can read the response xml in " +
-        errorFileName,
+      errOutput + "\n=> you can read the full response xml in " + errorFileName,
     );
   }
 
@@ -147,8 +147,6 @@ function extractJsonResponse(
 //       XIPTDAT_: "20260421",
 //       XVCRDES_: "Test form ts - 1",
 //       XWRHE_: "",
-//       XBPTNUM_: "",
-//       XPLATE_: "",
 //       XNB_: 1,
 //     },
 //     GRP2: [
@@ -175,21 +173,19 @@ const xml = `<?XML VERSION="1.0" ENCODING="UTF-8"?>
   <GRP ID="GRP1">
     <FLD NAM="XOPPNUM_"></FLD>
     <FLD NAM="XFCY_" >FR012</FLD>
-    <FLD NAM="XIPTDAT_" >20260424</FLD>
+    <FLD NAM="XIPTDAT_" >20260522</FLD>
     <FLD NAM="XVCRDES_" >Test from ts - xml</FLD>
     <FLD NAM="XWRHE_" ></FLD>
-    <FLD NAM="XBPTNUM_" ></FLD>
-    <FLD NAM="XPLATE_" ></FLD>
     <FLD NAM="XNB_" >1</FLD>
   </GRP>
   <TAB DIM="100" ID="GRP2" SIZE="1">
     <LIN NUM="1" >
       <FLD NAM="XSTOCOU_">130</FLD>
       <FLD NAM="XSEQ_" >0</FLD>
-      <FLD NAM="XQTYPCU_" >1000000</FLD>
+      <FLD NAM="XQTYPCU_" >1</FLD>
       <FLD NAM="XPCU_">UN</FLD>
       <FLD NAM="XPCUSTUCOE_" >1</FLD>
-      <FLD NAM="XQTYSTU_" >1000000</FLD>
+      <FLD NAM="XQTYSTU_" >1</FLD>
       <FLD NAM="XLOC_">A1C14</FLD>
       <FLD NAM="XSTA_">A</FLD>
     </LIN>
@@ -197,12 +193,12 @@ const xml = `<?XML VERSION="1.0" ENCODING="UTF-8"?>
 </PARAM>
 `;
 callWS(
-  "ZTESTWS",
+  "ZCHANGEWS",
   xml,
   ["XERR_", "XSTA_", "XLOC_", "XCHGNUM_"],
   "XML",
   "run",
-  "on",
+  "off",
 )
   .then(console.log)
-  .catch(console.error);
+  .catch((err) => console.error(err.message));
