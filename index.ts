@@ -29,8 +29,8 @@ export async function callWS(
     | "getDataXmlSchema"
     | "insertLines"
     | "deleteLines" = "run",
-  soapAction: string = "",
   trace: "on" | "off" = "off",
+  soapAction: string = "",
 ) {
   const xml = `<soapenv:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:wss="http://www.adonix.com/WSS">
      <soapenv:Header/>
